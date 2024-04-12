@@ -434,6 +434,20 @@ func (r *Repository) DeleteJob(ctx context.Context, tx *sql.Tx, job *Job) error 
 	return nil
 }
 
+func (r *Repository) FindDatasetWithConn(ctx context.Context, tx *sql.Tx, projectID, datasetID string) (*Dataset, error) {
+	datasets, err := r.findDatasets(ctx, tx, projectID, []string{datasetID})
+	if err != nil {
+		return nil, err
+	}
+	if len(datasets) != 1 {
+		return nil, nil
+	}
+	if datasets[0].ID != datasetID {
+		return nil, nil
+	}
+	return datasets[0], err
+}
+
 func (r *Repository) FindDataset(ctx context.Context, projectID, datasetID string) (*Dataset, error) {
 	conn, err := r.getConnection(ctx)
 	if err != nil {

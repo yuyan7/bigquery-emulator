@@ -332,7 +332,7 @@ func (r *Repository) convertValueToCell(value interface{}) (*internaltypes.Table
 	return &internaltypes.TableCell{V: cells, Bytes: totalBytes}, nil
 }
 
-func (r *Repository) CreateOrReplaceTable(ctx context.Context, tx *connection.Tx, projectID, datasetID string, table *types.Table) error {
+func (r *Repository) CreateTableIfNotExists(ctx context.Context, tx *connection.Tx, projectID, datasetID string, table *types.Table) error {
 	tx.SetProjectAndDataset(projectID, datasetID)
 	if err := tx.ContentRepoMode(); err != nil {
 		return err
@@ -348,7 +348,7 @@ func (r *Repository) CreateOrReplaceTable(ctx context.Context, tx *connection.Tx
 		)
 	}
 	ddl := fmt.Sprintf(
-		"CREATE OR REPLACE TABLE `%s` (%s)",
+		"CREATE TABLE `%s` (%s)",
 		r.tablePath(projectID, datasetID, table.ID), strings.Join(columns, ","),
 	)
 

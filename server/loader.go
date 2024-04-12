@@ -49,6 +49,13 @@ func (s *Server) addProject(ctx context.Context, project *types.Project) error {
 		}
 	}
 	for _, dataset := range p.Datasets() {
+		found, err := s.metaRepo.FindDatasetWithConn(ctx, tx.Tx(), p.ID, dataset.ID)
+		if err != nil {
+			return err
+		}
+		if found != nil {
+			continue
+		}
 		if err := dataset.Insert(ctx, tx.Tx()); err != nil {
 			return err
 		}
@@ -65,8 +72,8 @@ func (s *Server) addProject(ctx context.Context, project *types.Project) error {
 }
 
 func (s *Server) addTableData(ctx context.Context, tx *connection.Tx, project *types.Project, dataset *types.Dataset, table *types.Table) error {
-	if err := s.contentRepo.CreateOrReplaceTable(ctx, tx, project.ID, dataset.ID, table); err != nil {
-		return err
+	if err := s.contentRepo.CreateTableIfNotExists(ctx, tx, project.ID, dataset.ID, table); err != nil {
+		return nil
 	}
 	if err := s.contentRepo.AddTableData(ctx, tx, project.ID, dataset.ID, table); err != nil {
 		return err
